@@ -1,20 +1,38 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+import _ from 'lodash';
 import './App.css';
+import Expenses from './components/Expenses';
+
+import expensesData from './data/expenses.json';
+
+const width = 900;
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { expenses: [] };
+  }
+
+  componentWillMount() {
+    // process data
+    const expenses = _.chain(expensesData)
+      .filter(d => d.Amount < 0)
+      .map(d => ({
+        amount: -d.Amount,
+        name: d.Description,
+        date: new Date(d['Trans Date']),
+      }))
+      .value();
+
+    this.setState({ expenses });
+  }
+
   render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-      </div>
-    );
+    const props = {
+      width,
+    };
+
+    return <Expenses {...props} {...this.state} />;
   }
 }
 
