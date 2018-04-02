@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import _ from 'lodash';
 import * as d3 from 'd3';
 import chroma from 'chroma-js';
@@ -24,11 +24,12 @@ const simulation = d3
   .force('y', d3.forceY(d => d.focusY))
   .stop();
 
-class App extends Component {
+class Expenses extends React.Component {
   constructor(props) {
     super(props);
 
     this.forceTick = this.forceTick.bind(this);
+    this.container = React.createRef();
   }
 
   componentWillMount() {
@@ -39,7 +40,7 @@ class App extends Component {
   }
 
   componentDidMount() {
-    this.container = d3.select(this.refs.container);
+    this.container = d3.select(this.container.current);
     this.calculateData();
     this.renderCircles();
 
@@ -98,8 +99,8 @@ class App extends Component {
   }
 
   render() {
-    return <svg width={this.props.width} height={height} ref="container" />;
+    return <svg width={this.props.width} height={height} ref={this.container} />;
   }
 }
 
-export default App;
+export default Expenses;

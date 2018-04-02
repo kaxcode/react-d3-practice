@@ -1,13 +1,12 @@
-import React, { Component } from 'react';
+import React from 'react';
 import _ from 'lodash';
 import './App.css';
 import Expenses from './components/Expenses';
-
 import expensesData from './data/expenses.json';
 
 const width = 900;
 
-class App extends Component {
+class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = { expenses: [] };
