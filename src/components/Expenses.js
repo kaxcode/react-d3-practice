@@ -3,10 +3,10 @@ import _ from 'lodash';
 import * as d3 from 'd3';
 import chroma from 'chroma-js';
 
-const height = 900;
+const height = 600;
 const margin = {
   left: 20,
-  top: 20,
+  top: 60,
   right: 20,
   bottom: 20,
 };
@@ -14,6 +14,7 @@ const radius = 7;
 
 // d3 functions
 const xScale = d3.scaleBand().domain([0, 1, 2, 3, 4, 5, 6]);
+const yScale = d3.scaleLinear().range([height - margin.bottom, margin.top]);
 const colorScale = chroma.scale(['#53cf8d', '#f7d283', '#e85151']);
 const amountScale = d3.scaleLog();
 const simulation = d3
@@ -49,18 +50,18 @@ class Expenses extends React.Component {
   }
 
   calculateData() {
-    let row = -1;
+    const weeksExtent = d3.extent(this.props.expenses, d => d3.timeWeek.floor(d.date));
+    yScale.domain(weeksExtent);
     this.expenses = _.chain(this.props.expenses)
       .groupBy(d => d3.timeWeek.floor(d.date))
-      .sortBy((expenses, week) => new Date(week))
-      .map(expenses => {
-        row += 1;
-        return _.map(expenses, exp =>
-          Object.assign(exp, {
+      .map((expenses, week) => {
+        week = new Date(week);
+        return _.map(expenses, exp => {
+          return Object.assign(exp, {
             focusX: xScale(exp.date.getDay()),
-            focusY: row * 120,
-          }),
-        );
+            focusY: yScale(week),
+          });
+        });
       })
       .flatten()
       .value();
