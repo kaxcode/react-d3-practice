@@ -18,7 +18,6 @@ const colorScale = chroma.scale(['#53cf8d', '#f7d283', '#e85151']);
 const amountScale = d3.scaleLog();
 const simulation = d3
   .forceSimulation()
-  // .force('charge', d3.forceManyBody(-10))
   .force('collide', d3.forceCollide(radius))
   .force('x', d3.forceX(d => d.focusX))
   .force('y', d3.forceY(d => d.focusY))
@@ -28,7 +27,6 @@ class Expenses extends React.Component {
   constructor(props) {
     super(props);
 
-    this.forceTick = this.forceTick.bind(this);
     this.container = React.createRef();
   }
 
@@ -50,23 +48,19 @@ class Expenses extends React.Component {
       .restart();
   }
 
-  componentDidUpdate() {
-    this.calculateData();
-    // this.renderCircles();
-  }
-
   calculateData() {
     let row = -1;
     this.expenses = _.chain(this.props.expenses)
       .groupBy(d => d3.timeWeek.floor(d.date))
       .sortBy((expenses, week) => new Date(week))
-      .map((expenses) => {
+      .map(expenses => {
         row += 1;
         return _.map(expenses, exp =>
           Object.assign(exp, {
             focusX: xScale(exp.date.getDay()),
             focusY: row * 120,
-          }));
+          }),
+        );
       })
       .flatten()
       .value();
@@ -75,9 +69,9 @@ class Expenses extends React.Component {
     amountScale.domain(amountExtent);
   }
 
-  forceTick() {
+  forceTick = () => {
     this.circles.attr('cx', d => d.x).attr('cy', d => d.y);
-  }
+  };
 
   renderCircles() {
     // draw expenses circles
