@@ -19,7 +19,7 @@ class App extends React.Component {
       .map(d => ({
         amount: -d.Amount,
         name: d.Description,
-        date: new Date(d['Trans Date']),
+        date: new Date(d['Trans Date'])
       }))
       .value();
 
@@ -28,7 +28,7 @@ class App extends React.Component {
 
   render() {
     const props = {
-      width,
+      width
     };
 
     return <Expenses {...props} {...this.state} />;
