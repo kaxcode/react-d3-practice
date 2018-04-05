@@ -23,9 +23,9 @@
     "lint": "./node_modules/.bin/eslint . --fix --ignore-path .gitignore"
   },
   "devDependencies": {
-    "eslint": "^4.19.1",
+    "babel-eslint": "7",
+    "eslint": "3.x",
     "eslint-config-airbnb": "^16.1.0",
-    "eslint-config-prettier": "^2.9.0",
     "eslint-config-react": "^1.1.7"
   }
 }
