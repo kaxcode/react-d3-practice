@@ -8,6 +8,11 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 * d3.selectAll- selects all the matching elements. Project example: `this.container.selectAll('.expense');`
 
+### Add and Remove Elements
+
+* .append- adds an element of _type_ to the children of each element in the selection. Project example: `.append('g')`  
+  The <g> SVG element is a container used to group other SVG elements. [Source](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/g)
+
 ### Scale Functions
 
 * d3.scaleBand-
