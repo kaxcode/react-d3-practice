@@ -13,16 +13,7 @@ const margin = {
 const radius = 7;
 
 // d3 functions
-const daysOfWeek = [
-  [0, 'S'],
-  [1, 'M'],
-  [2, 'T'],
-  [3, 'W'],
-  [4, 'Th'],
-  [5, 'F'],
-  [6, 'S']
-];
-const xScale = d3.scaleBand().domain(_.map(daysOfWeek, 0));
+const xScale = d3.scaleBand().domain([0, 1, 2, 3, 4, 5, 6]);
 const yScale = d3.scaleLinear().range([height - margin.bottom, margin.top]);
 const colorScale = chroma.scale(['#53cf8d', '#f7d283', '#e85151']);
 const amountScale = d3.scaleLog();
@@ -48,7 +39,6 @@ class Expenses extends React.Component {
   componentDidMount() {
     this.container = d3.select(this.container.current);
     this.calculateData();
-    this.renderDayCircles();
     this.renderCircles();
 
     simulation
@@ -68,43 +58,14 @@ class Expenses extends React.Component {
     );
     yScale.domain(weeksExtent);
 
-    const selectedWeek = weeksExtent[1];
-    const perAngle = Math.PI / 6;
-    const selectedWeekRadius =
-      (this.props.width - margin.left - margin.right) / 2;
-
-    this.days = _.map(daysOfWeek, date => {
-      const [dayOfWeek, name] = date;
-      const angle = (Math.PI - perAngle) * dayOfWeek;
-      const x = selectedWeekRadius * Math.cos(angle) + this.props.width / 2;
-      const y = selectedWeekRadius * Math.sin(angle) + margin.top;
-      return {
-        name,
-        x,
-        y
-      };
-    });
-
     this.expenses = _.chain(this.props.expenses)
       .groupBy(d => d3.timeWeek.floor(d.date))
       .map((expenses, week) => {
         week = new Date(week);
         return _.map(expenses, exp => {
-          const dayOfWeek = exp.date.getDay();
-          let focusX = xScale(dayOfWeek);
-          let focusY = yScale(week) + height;
-
-          if (week.getTime() === selectedWeek.getTime()) {
-            const angle = (Math.PI - perAngle) * dayOfWeek;
-
-            focusX =
-              selectedWeekRadius * Math.cos(angle) + this.props.width / 2;
-            focusY = selectedWeekRadius * Math.sin(angle) + margin.top;
-          }
-
           return Object.assign(exp, {
-            focusX,
-            focusY
+            focusX: xScale(exp.date.getDay()),
+            focusY: yScale(week)
           });
         });
       })
@@ -135,33 +96,6 @@ class Expenses extends React.Component {
       .merge(this.circles)
       .attr('fill', d => colorScale(amountScale(d.amount)))
       .attr('stroke', d => colorScale(amountScale(d.amount)));
-  }
-
-  renderDayCircles() {
-    const days = this.container
-      .selectAll('.day')
-      .data(this.days, d => d.name)
-      .enter()
-      .append('g')
-      .classed('day', true)
-      .attr('transform', d => `translate(${[d.x, d.y]})`);
-
-    const daysRadius = 80;
-    const fontSize = 12;
-    days
-      .append('circle')
-      .attr('r', daysRadius)
-      .attr('fill', '#ccc')
-      .attr('opacity', 0.25);
-
-    days
-      .append('text')
-      .attr('y', daysRadius + fontSize)
-      .attr('text-anchor', 'middle')
-      .attr('dy', '.35em')
-      .attr('fill', '#999')
-      .style('font-weight', 600)
-      .text(d => d.name);
   }
 
   forceTick = () => {
