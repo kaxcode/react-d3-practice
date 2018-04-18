@@ -39,7 +39,8 @@ class Expenses extends React.Component {
   componentDidMount() {
     this.container = d3.select(this.container.current);
     this.calculateData();
-    this.renderCircles();
+    this.renderWeeks();
+    this.renderDays();
 
     simulation
       .nodes(this.props.expenses)
@@ -49,7 +50,6 @@ class Expenses extends React.Component {
 
   componentDidUpdate() {
     this.calculateData();
-    // this.renderCircles();
   }
 
   calculateData() {
@@ -57,6 +57,20 @@ class Expenses extends React.Component {
       d3.timeWeek.floor(d.date)
     );
     yScale.domain(weeksExtent);
+
+    // rectangle for each week
+    var weeks = d3.timeWeek.range(
+      weeksExtent[0],
+      d3.timeWeek.offset(weeksExtent[1], 1)
+    );
+    this.weeks = _.map(weeks, week => {
+      return {
+        week,
+        x: margin.left,
+        y: yScale(week) + height
+      };
+    });
+    console.log(this.weeks);
 
     this.expenses = _.chain(this.props.expenses)
       .groupBy(d => d3.timeWeek.floor(d.date))
@@ -76,7 +90,7 @@ class Expenses extends React.Component {
     amountScale.domain(amountExtent);
   }
 
-  renderCircles() {
+  renderDays() {
     // draw expenses circles
     this.circles = this.container
       .selectAll('.expense')
@@ -96,6 +110,32 @@ class Expenses extends React.Component {
       .merge(this.circles)
       .attr('fill', d => colorScale(amountScale(d.amount)))
       .attr('stroke', d => colorScale(amountScale(d.amount)));
+  }
+
+  renderWeeks() {
+    var weeks = this.container
+      .selectAll('.week')
+      .data(this.weeks, d => d.name)
+      .enter()
+      .append('g')
+      .classed('week', true)
+      .attr('transform', d => 'translate(' + [d.x, d.y] + ')');
+
+    var rectHeight = 10;
+    weeks
+      .append('rect')
+      .attr('y', -rectHeight / 2)
+      .attr('width', this.props.width - margin.left - margin.right)
+      .attr('height', rectHeight)
+      .attr('fill', '#ccc')
+      .attr('opacity', 0.25);
+
+    var weekFormat = d3.timeFormat('%m/%d');
+    weeks
+      .append('text')
+      .attr('text-anchor', 'end')
+      .attr('dy', '.35em')
+      .text(d => weekFormat(d.week));
   }
 
   forceTick = () => {
