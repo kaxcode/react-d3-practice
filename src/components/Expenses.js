@@ -70,7 +70,6 @@ class Expenses extends React.Component {
         y: yScale(week) + height
       };
     });
-    console.log(this.weeks);
 
     this.expenses = _.chain(this.props.expenses)
       .groupBy(d => d3.timeWeek.floor(d.date))
