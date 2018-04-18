@@ -27,7 +27,7 @@ const simulation = d3
 class Expenses extends React.Component {
   constructor(props) {
     super(props);
-
+    this.state = {};
     this.container = React.createRef();
   }
 
