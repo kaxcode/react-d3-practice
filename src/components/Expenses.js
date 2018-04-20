@@ -34,7 +34,7 @@ class Expenses extends Component {
     super(props);
 
     this.state = {};
-    this.container = React.createRefs();
+    this.container = React.createRef();
     this.forceTick = this.forceTick.bind(this);
   }
 
