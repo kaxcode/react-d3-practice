@@ -6,41 +6,36 @@ import Expenses from './components/Expenses';
 
 import expensesData from './data/expenses.json';
 
-var width = 900;
+const width = 900;
 
 class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      expenses: [],
-      selectedWeek: null
-    };
-  }
+  state = {
+    expenses: [],
+    selectedWeek: null,
+  };
 
   componentWillMount() {
     // process data
-    var expenses = _.chain(expensesData)
+    const expenses = _.chain(expensesData)
       .filter(d => d.Amount < 0)
-      .map(d => {
-        return {
-          amount: -d.Amount,
-          name: d.Description,
-          date: new Date(d['Trans Date'])
-        };
-      })
+      .map(d => ({
+        amount: -d.Amount,
+        name: d.Description,
+        date: new Date(d['Trans Date']),
+      }))
       .value();
 
     // default selected week will be the most recent week
-    var selectedWeek = d3.max(expenses, exp => d3.timeWeek.floor(exp.date));
+    const selectedWeek = d3.max(expenses, exp => d3.timeWeek.floor(exp.date));
 
     this.setState({ expenses, selectedWeek });
   }
 
   render() {
-    var props = {
-      width
+    const props = {
+      width,
     };
-    var selectedWeek = d3.timeFormat('%B %d, %Y')(this.state.selectedWeek);
+    const selectedWeek = d3.timeFormat('%B %d, %Y')(this.state.selectedWeek);
 
     return (
       <div className="App">

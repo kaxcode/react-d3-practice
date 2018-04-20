@@ -4,25 +4,22 @@ import _ from 'lodash';
 
 import chroma from 'chroma-js';
 
-var height = 600;
-var margin = { left: 40, top: 20, right: 40, bottom: 20 };
-var radius = 7;
+const height = 600;
+const margin = {
+  left: 40,
+  top: 20,
+  right: 40,
+  bottom: 20,
+};
+const radius = 7;
 
 // d3 functions
-var daysOfWeek = [
-  [0, 'S'],
-  [1, 'M'],
-  [2, 'T'],
-  [3, 'W'],
-  [4, 'Th'],
-  [5, 'F'],
-  [6, 'S']
-];
-var xScale = d3.scaleBand().domain(_.map(daysOfWeek, 0));
-var yScale = d3.scaleLinear().range([height - margin.bottom, margin.top]);
-var colorScale = chroma.scale(['#53cf8d', '#f7d283', '#e85151']);
-var amountScale = d3.scaleLog();
-var simulation = d3
+const daysOfWeek = [[0, 'S'], [1, 'M'], [2, 'T'], [3, 'W'], [4, 'Th'], [5, 'F'], [6, 'S']];
+const xScale = d3.scaleBand().domain(_.map(daysOfWeek, 0));
+const yScale = d3.scaleLinear().range([height - margin.bottom, margin.top]);
+const colorScale = chroma.scale(['#53cf8d', '#f7d283', '#e85151']);
+const amountScale = d3.scaleLog();
+const simulation = d3
   .forceSimulation()
   .alphaDecay(0.001)
   .velocityDecay(0.3)
@@ -32,11 +29,12 @@ var simulation = d3
   .force('y', d3.forceY(d => d.focusY))
   .stop();
 
-class App extends Component {
+class Expenses extends Component {
   constructor(props) {
     super(props);
 
     this.state = {};
+    this.container = React.createRef();
     this.forceTick = this.forceTick.bind(this);
   }
 
@@ -46,7 +44,7 @@ class App extends Component {
   }
 
   componentDidMount() {
-    this.container = d3.select(this.refs.container);
+    this.container = d3.select(this.container.current);
     this.calculateData();
     this.renderWeeks();
     this.renderDays();
@@ -69,38 +67,30 @@ class App extends Component {
   }
 
   calculateData() {
-    var weeksExtent = d3.extent(this.props.expenses, d =>
-      d3.timeWeek.floor(d.date)
-    );
+    const weeksExtent = d3.extent(this.props.expenses, d => d3.timeWeek.floor(d.date));
     yScale.domain(weeksExtent);
 
-    var perAngle = Math.PI / 6;
-    var selectedWeekRadius =
-      (this.props.width - margin.left - margin.right) / 2;
+    const perAngle = Math.PI / 6;
+    const selectedWeekRadius = (this.props.width - margin.left - margin.right) / 2;
 
     // rectangle for each week
-    var weeks = d3.timeWeek.range(
-      weeksExtent[0],
-      d3.timeWeek.offset(weeksExtent[1], 1)
-    );
-    this.weeks = _.map(weeks, week => {
-      return {
-        week,
-        x: margin.left,
-        y: yScale(week) + height
-      };
-    });
+    const weeks = d3.timeWeek.range(weeksExtent[0], d3.timeWeek.offset(weeksExtent[1], 1));
+    this.weeks = _.map(weeks, week => ({
+      week,
+      x: margin.left,
+      y: yScale(week) + height,
+    }));
 
     // circles for the back of each day in semi-circle
-    this.days = _.map(daysOfWeek, date => {
-      var [dayOfWeek, name] = date;
-      var angle = Math.PI - perAngle * dayOfWeek;
-      var x = selectedWeekRadius * Math.cos(angle) + this.props.width / 2;
-      var y = selectedWeekRadius * Math.sin(angle) + margin.top;
+    this.days = _.map(daysOfWeek, (date) => {
+      const [dayOfWeek, name] = date;
+      const angle = Math.PI - perAngle * dayOfWeek;
+      const x = selectedWeekRadius * Math.cos(angle) + this.props.width / 2;
+      const y = selectedWeekRadius * Math.sin(angle) + margin.top;
       return {
         name,
         x,
-        y
+        y,
       };
     });
 
@@ -108,37 +98,38 @@ class App extends Component {
       .groupBy(d => d3.timeWeek.floor(d.date))
       .map((expenses, week) => {
         week = new Date(week);
-        return _.map(expenses, exp => {
-          var dayOfWeek = exp.date.getDay();
-          var focusX = xScale(dayOfWeek);
-          var focusY = yScale(week) + height;
+        return _.map(expenses, (exp) => {
+          const dayOfWeek = exp.date.getDay();
+          let focusX = xScale(dayOfWeek);
+          let focusY = yScale(week) + height;
 
           if (week.getTime() === this.props.selectedWeek.getTime()) {
-            var angle = Math.PI - perAngle * dayOfWeek;
+            const angle = Math.PI - perAngle * dayOfWeek;
 
-            focusX =
-              selectedWeekRadius * Math.cos(angle) + this.props.width / 2;
+            focusX = selectedWeekRadius * Math.cos(angle) + this.props.width / 2;
             focusY = selectedWeekRadius * Math.sin(angle) + margin.top;
           }
 
           return Object.assign(exp, {
             focusX,
-            focusY
+            focusY,
           });
         });
       })
       .flatten()
       .value();
 
-    var amountExtent = d3.extent(this.expenses, d => d.amount);
+    const amountExtent = d3.extent(this.expenses, d => d.amount);
     amountScale.domain(amountExtent);
+  }
+
+  forceTick() {
+    this.circles.attr('cx', d => d.x).attr('cy', d => d.y);
   }
 
   renderCircles() {
     // draw expenses circles
-    this.circles = this.container
-      .selectAll('.expense')
-      .data(this.expenses, d => d.name);
+    this.circles = this.container.selectAll('.expense').data(this.expenses, d => d.name);
 
     // exit
     this.circles.exit().remove();
@@ -157,16 +148,16 @@ class App extends Component {
   }
 
   renderDays() {
-    var days = this.container
+    const days = this.container
       .selectAll('.day')
       .data(this.days, d => d.name)
       .enter()
       .append('g')
       .classed('day', true)
-      .attr('transform', d => 'translate(' + [d.x, d.y] + ')');
+      .attr('transform', d => `translate(${[d.x, d.y]})`);
 
-    var daysRadius = 80;
-    var fontSize = 12;
+    const daysRadius = 80;
+    const fontSize = 12;
     days
       .append('circle')
       .attr('r', daysRadius)
@@ -184,15 +175,15 @@ class App extends Component {
   }
 
   renderWeeks() {
-    var weeks = this.container
+    const weeks = this.container
       .selectAll('.week')
       .data(this.weeks, d => d.name)
       .enter()
       .append('g')
       .classed('week', true)
-      .attr('transform', d => 'translate(' + [d.x, d.y] + ')');
+      .attr('transform', d => `translate(${[d.x, d.y]})`);
 
-    var rectHeight = 10;
+    const rectHeight = 10;
     weeks
       .append('rect')
       .attr('y', -rectHeight / 2)
@@ -201,7 +192,7 @@ class App extends Component {
       .attr('fill', '#ccc')
       .attr('opacity', 0.25);
 
-    var weekFormat = d3.timeFormat('%m/%d');
+    const weekFormat = d3.timeFormat('%m/%d');
     weeks
       .append('text')
       .attr('text-anchor', 'end')
@@ -209,13 +200,9 @@ class App extends Component {
       .text(d => weekFormat(d.week));
   }
 
-  forceTick() {
-    this.circles.attr('cx', d => d.x).attr('cy', d => d.y);
-  }
-
   render() {
-    return <svg width={this.props.width} height={2 * height} ref="container" />;
+    return <svg width={this.props.width} height={2 * height} ref={this.container} />;
   }
 }
 
-export default App;
+export default Expenses;
