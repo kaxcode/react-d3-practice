@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import * as d3 from 'd3';
 import _ from 'lodash';
+
 import chroma from 'chroma-js';
 
 const height = 600;
@@ -22,6 +23,7 @@ const simulation = d3
   .forceSimulation()
   .alphaDecay(0.001)
   .velocityDecay(0.3)
+  // .force('charge', d3.forceManyBody(-10))
   .force('collide', d3.forceCollide(radius))
   .force('x', d3.forceX(d => d.focusX))
   .force('y', d3.forceY(d => d.focusY))
@@ -30,7 +32,10 @@ const simulation = d3
 class Expenses extends Component {
   constructor(props) {
     super(props);
-    this.inputRef = React.createRef();
+
+    this.state = {};
+    this.container = React.createRefs();
+    this.forceTick = this.forceTick.bind(this);
   }
 
   componentWillMount() {
@@ -39,7 +44,7 @@ class Expenses extends Component {
   }
 
   componentDidMount() {
-    this.container = d3.select(this.refs.container);
+    this.container = d3.select(this.container.current);
     this.calculateData();
     this.renderWeeks();
     this.renderDays();
@@ -118,6 +123,10 @@ class Expenses extends Component {
     amountScale.domain(amountExtent);
   }
 
+  forceTick() {
+    this.circles.attr('cx', d => d.x).attr('cy', d => d.y);
+  }
+
   renderCircles() {
     // draw expenses circles
     this.circles = this.container.selectAll('.expense').data(this.expenses, d => d.name);
@@ -191,12 +200,8 @@ class Expenses extends Component {
       .text(d => weekFormat(d.week));
   }
 
-  forceTick = () => {
-    this.circles.attr('cx', d => d.x).attr('cy', d => d.y);
-  };
-
   render() {
-    return <svg width={this.props.width} height={2 * height} ref="container" />;
+    return <svg width={this.props.width} height={2 * height} ref={this.container} />;
   }
 }
 
