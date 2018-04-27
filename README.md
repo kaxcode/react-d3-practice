@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/kaxcode/react-d3-practice.svg?branch=master)](https://travis-ci.org/kaxcode/react-d3-practice)
 This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
 
 ## D3 Functions used
@@ -10,7 +11,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 ### Add and Remove Elements
 
-* .append- adds an element of _type_ to the children of each element in the selection. Project example: `.append('g')`  
+* .append- adds an element of _type_ to the children of each element in the selection. Project example: `.append('g')`
   The <g> SVG element is a container used to group other SVG elements. [Source](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/g)
 
 ### Scale Functions
